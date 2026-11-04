@@ -1,10 +1,29 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule, ObserveInstrument } from './app.module.js';
+import 'dotenv/config';
+import { NestFactory } from "@nestjs/core";
+import { AppModule, ObserveInstrument } from "./app.module.js";
+import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     instrument: ObserveInstrument,
   });
-  await app.listen(process.env.PORT ?? 3000);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
+
+  app.enableShutdownHooks();
+
+  await app.listen(process.env.PORT ?? 4000);
 }
+
 await bootstrap();
