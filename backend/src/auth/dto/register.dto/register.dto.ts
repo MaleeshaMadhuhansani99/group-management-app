@@ -1,5 +1,4 @@
 import {
-  IsEmail,
   IsString,
   Matches,
   MaxLength,
@@ -14,10 +13,6 @@ export class RegisterDto {
     message: 'Username can only contain letters, numbers, and underscores',
   })
   username: string;
-
-  @IsEmail()
-  @MaxLength(254)
-  email: string;
 
   @IsString()
   @MinLength(8)

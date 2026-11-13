@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "js"
 }
 
 datasource db {
@@ -16,22 +17,20 @@ enum GroupRole {
 model User {
   id              String    @id @default(cuid())
   username        String?   @unique
-  email           String    @unique
+  email           String?   @unique
   passwordHash    String?
   googleId        String?   @unique
   emailVerifiedAt DateTime?
+  name            String?
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  name  String?
-  image String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  createdGroups      Group[]                  @relation("GroupCreator")
-  memberships        GroupMember[]
-  sessions           Session[]
-  verificationTokens EmailVerificationToken[]
-  createdInvitations Invitation[]             @relation("InvitationCreator")
+  createdGroups       Group[]                @relation("GroupCreator")
+  memberships         GroupMember[]
+  sessions            Session[]
+  verificationTokens  EmailVerificationToken[]
+  createdInvitations  Invitation[]
 }
 
 model Session {
@@ -103,7 +102,7 @@ model Invitation {
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   createdById String
-  createdBy   User   @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy User  @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   role GroupRole @default(MEMBER)
 

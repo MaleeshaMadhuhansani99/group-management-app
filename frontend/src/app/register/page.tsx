@@ -1,94 +1,63 @@
 
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { SubmitEvent } from 'react';
 
-interface RegisterResponse {
-  message?: string;
-  user?: {
-    id: string;
-    username: string;
-    email: string;
-  };
-}
+import { useRouter } from 'next/navigation';
+import GoogleLoginButton from '@/components/google_login_btn';
+
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { registerUser, clearError } from '@/features/auth/authSlice';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const { loading, error } = useAppSelector(
+    (state) => state.auth
+  );
+
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    setError('');
     setSuccess('');
+    dispatch(clearError());
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      // We'll use local validation below instead of sending this to the API.
+      setSuccess('');
       return;
     }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const result = await dispatch(
+      registerUser({
+        username: username.trim(),
+        password,
+      })
+    );
 
-    if (!apiUrl) {
-      setError('API URL is not configured.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const response = await fetch(`${apiUrl}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username.trim(),
-          email: email.trim(),
-          password,
-        }),
-      });
-
-      const data: RegisterResponse & { message?: string | string[] } =
-        await response.json();
-
-      if (!response.ok) {
-        const message = data.message;
-
-        setError(
-          Array.isArray(message)
-            ? message.join(', ')
-            : message || 'Registration failed. Please try again.',
-        );
-        return;
-      }
-
-      setSuccess(
-        data.message || 'Your account has been created successfully!',
-      );
+    if (registerUser.fulfilled.match(result)) {
+      setSuccess('Account created successfully! Redirecting to login...');
 
       setUsername('');
-      setEmail('');
       setPassword('');
       setConfirmPassword('');
-    } catch {
-      setError(
-        'Unable to connect to the server. Please check your connection and try again.',
-      );
-    } finally {
-      setLoading(false);
+
+      router.push('/login');
     }
   };
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+
+        {/* Heading */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             Create your account
@@ -99,7 +68,10 @@ export default function RegisterPage() {
           </p>
         </div>
 
+        {/* Registration form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* Username */}
           <div>
             <label
               htmlFor="username"
@@ -120,31 +92,11 @@ export default function RegisterPage() {
               title="Use only letters, numbers, and underscores."
               autoComplete="username"
               required
-              className="w-full rounded-lg border text-gray-600 border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Email address
-            </label>
-
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              autoComplete="email"
-              maxLength={254}
-              required
-              className="w-full rounded-lg border text-gray-600 border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            />
-          </div>
-
+          {/* Password */}
           <div>
             <label
               htmlFor="password"
@@ -163,7 +115,7 @@ export default function RegisterPage() {
               maxLength={128}
               autoComplete="new-password"
               required
-              className="w-full rounded-lg border text-gray-600 border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
 
             <p className="mt-1.5 text-xs text-gray-500">
@@ -171,6 +123,7 @@ export default function RegisterPage() {
             </p>
           </div>
 
+          {/* Confirm password */}
           <div>
             <label
               htmlFor="confirmPassword"
@@ -185,12 +138,15 @@ export default function RegisterPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Enter your password again"
+              minLength={8}
+              maxLength={128}
               autoComplete="new-password"
               required
-              className="w-full rounded-lg border text-gray-600 border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-600 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
           </div>
 
+          {/* Error */}
           {error && (
             <div
               role="alert"
@@ -200,6 +156,7 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {/* Success */}
           {success && (
             <div
               role="status"
@@ -209,6 +166,7 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -218,9 +176,22 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-gray-500">
-          By creating an account, you agree to use the platform responsibly.
+        {/* Google registration */}
+        <div className="mt-6">
+          <GoogleLoginButton />
+        </div>
+
+        {/* Login link */}
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Already have an account?{' '}
+          <a
+            href="/login"
+            className="font-semibold text-indigo-600 hover:text-indigo-700"
+          >
+            Sign in
+          </a>
         </p>
+
       </div>
     </main>
   );

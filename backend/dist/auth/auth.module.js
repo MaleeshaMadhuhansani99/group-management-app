@@ -5,14 +5,32 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
     Module({
+        imports: [
+            JwtModule.registerAsync({
+                useFactory: () => {
+                    const secret = process.env.JWT_ACCESS_SECRET;
+                    if (!secret) {
+                        throw new Error('JWT_ACCESS_SECRET is not configured');
+                    }
+                    return {
+                        secret,
+                        signOptions: {
+                            expiresIn: '15m',
+                        },
+                    };
+                },
+            }),
+        ],
         controllers: [AuthController],
         providers: [AuthService],
+        exports: [JwtModule],
     })
 ], AuthModule);
 export { AuthModule };
