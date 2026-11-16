@@ -1,33 +1,10 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { AuthState, User } from './authTypes';
+import type { ApiError, AuthState, LoginCredentials, RegisterCredentials, User } from './authTypes';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// API response type
-interface AuthResponse {
-  message: string;
-  user: User;
-}
-
-// Login credentials
-interface LoginCredentials {
-  identifier: string;
-  password: string;
-}
-
-// Registration credentials
-interface RegisterCredentials {
-  username: string;
-  password: string;
-}
-
-// API error response
-interface ApiError {
-  message?: string | string[];
-}
-
-// Extract API error messages
+//API error message
 function getErrorMessage(data: ApiError | null): string {
   if (Array.isArray(data?.message)) {
     return data.message.join(', ');

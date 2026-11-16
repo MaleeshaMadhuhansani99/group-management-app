@@ -12,11 +12,9 @@ export default function LoginPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
 
-  // Local form state
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
 
-  // Redux state
   const {loading, error} = useAppSelector((state) => state.auth)
 
   // Username/password login
@@ -43,14 +41,14 @@ export default function LoginPage() {
     const result = await dispatch(googleLogin(credential))
 
     if (googleLogin.fulfilled.match(result)) {
-      router.replace('/')
+      console.log('Google login successful. Redirecting...');
+      router.replace('/dashboard');
     }
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
-        {/* Logo and heading */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-xl font-bold text-white">
             G

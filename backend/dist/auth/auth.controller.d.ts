@@ -10,8 +10,8 @@ export declare class AuthController {
     register(dto: RegisterDto): Promise<{
         message: string;
         user: {
-            id: string;
             username: string | null;
+            id: string;
             createdAt: Date;
         };
     }>;
@@ -27,8 +27,8 @@ export declare class AuthController {
     googleLogin(dto: GoogleLoginDto, response: Response): Promise<{
         message: string;
         user: {
-            id: string;
             username: string | null;
+            id: string;
             email: string | null;
             name: string | null;
             image: string | null;
