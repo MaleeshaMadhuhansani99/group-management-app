@@ -1,12 +1,11 @@
+
 import 'dotenv/config';
-import { NestFactory } from "@nestjs/core";
-import { AppModule, ObserveInstrument } from "./app.module.js";
-import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    instrument: ObserveInstrument,
-  });
+  const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -17,7 +16,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   });
 

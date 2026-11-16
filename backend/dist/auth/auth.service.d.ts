@@ -11,8 +11,8 @@ export declare class AuthService {
     register(dto: RegisterDto): Promise<{
         message: string;
         user: {
-            username: string | null;
             id: string;
+            username: string | null;
             createdAt: Date;
         };
     }>;
@@ -28,8 +28,8 @@ export declare class AuthService {
     googleLogin(dto: GoogleLoginDto): Promise<{
         accessToken: string;
         user: {
-            username: string | null;
             id: string;
+            username: string | null;
             email: string | null;
             name: string | null;
             image: string | null;
